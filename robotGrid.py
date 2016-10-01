@@ -3,6 +3,8 @@ from collections import deque
 from enum import IntEnum
 import heapq
 
+import sys
+
 GRID_WIDTH = 7
 GRID_HEIGHT = 7
 DISPLAY_WIDTH = 8
@@ -16,6 +18,9 @@ class Coordinate:
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
+
+    def __ne__(self, other):
+        return (not self.__eq__(other))
 
     def __hash__(self):
         return self.x * DISPLAY_WIDTH + self.y
@@ -164,6 +169,9 @@ class HeapqItem:
     def __eq__(self, other):
         return self.cost == other.cost
 
+    def __repr__(self):
+        return str(self.coordinate)
+
 
 class GridData:
     def __init__(self):
@@ -226,6 +234,7 @@ class GridData:
                                                                                    coord_checking)))
 
             # get the new shortest path from priority queue
+            print(bfs_queue)
             current_path = heapq.heappop(bfs_queue)
 
         return current_path.directions
@@ -325,20 +334,20 @@ class Robot:
             for x in range(GRID_WIDTH):
                 if x == self.position.x and y == self.position.y:
                     # display robot facing
-                    print(ROBOT_SYMBOLS[self.facing], end=" ")
+                    sys.stdout.write(ROBOT_SYMBOLS[self.facing] + " ")
                 else:
                     if self.gridData.get(x, y).get_obstacle_here() == Knowledge.yes:
-                        print("X", end=" ")
+                        sys.stdout.write("X" + " ")
                     else:
                         if self.gridData.get(x, y).visited:
-                            print("@", end=" ")
+                            sys.stdout.write("@" + " ")
                         else:  # not visited
-                            print("O", end=" ")
+                            sys.stdout.write("O" + " ")
             print()  # new line
 
     def display_grid_wait_enter(self):
         self.display_grid_in_console()
-        input()
+        raw_input()
 
     def see_obstacle(self, direction):
         # TODO: replace this with readings from sensors
@@ -548,7 +557,7 @@ class OutsideGrid:
         for y in range(GRID_HEIGHT - 1, -1, -1):
             row = ""
             while len(row) != GRID_WIDTH:
-                row = input("row " + str(y) + ": ")
+                row = raw_input("row " + str(y) + ": ")
             for x in range(GRID_WIDTH):
                 self.data[x * GRID_HEIGHT + y].obstacle_here = (row[x] == "X")
 
@@ -560,8 +569,8 @@ class OutsideGrid:
 
 def test():
     outside_grid = OutsideGrid()
-    #outside_grid.random_obstacles()
-    outside_grid.input_from_console()
+    outside_grid.random_obstacles()
+    #outside_grid.input_from_console()
     robot = Robot(outside_grid)
     print(robot.report())
     robot.explore3()
